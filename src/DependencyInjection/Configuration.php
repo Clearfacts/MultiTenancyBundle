@@ -54,6 +54,29 @@ class Configuration implements ConfigurationInterface
             ->ignoreExtraKeys()
             ->addDefaultsIfNotSet()
             ->children()
+            ->variableNode('tenant_naming_strategy')->defaultValue('doctrine.orm.naming_strategy.default')->end()
+            ->arrayNode('mappings')
+            ->useAttributeAsKey('name')
+            ->prototype('array')
+            ->beforeNormalization()
+            ->ifString()
+            ->then(static function ($v) {
+                return ['type' => $v];
+            })
+            ->end()
+            ->treatNullLike([])
+            ->treatFalseLike(['mapping' => false])
+            ->performNoDeepMerging()
+            ->children()
+            ->scalarNode('mapping')->defaultValue(true)->end()
+            ->scalarNode('type')->end()
+            ->scalarNode('dir')->end()
+            ->scalarNode('alias')->end()
+            ->scalarNode('prefix')->end()
+            ->booleanNode('is_bundle')->end()
+            ->end()
+            ->end()
+            ->end()
             ->arrayNode('mapping')
             ->info('tenant Entity Manager mapping configuration, Its recommended to have a different mapping config than your main entity config')
             ->ignoreExtraKeys()
@@ -66,7 +89,8 @@ class Configuration implements ConfigurationInterface
             ->variableNode('is_bundle')->defaultValue(false)->info('Tenant entities alias example " Tenant " ')->end()
             ->end()
             ->end()
-            ->end();
+            ->end()
+        ;
 
         return $treeBuilder;
     }

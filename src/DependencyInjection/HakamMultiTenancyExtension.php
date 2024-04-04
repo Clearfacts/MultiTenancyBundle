@@ -20,7 +20,7 @@ class HakamMultiTenancyExtension extends Extension implements PrependExtensionIn
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
         $configuration = $this->getConfiguration($configs, $container);
@@ -59,7 +59,8 @@ class HakamMultiTenancyExtension extends Extension implements PrependExtensionIn
                 'entity_managers' => [
                     'tenant' => [
                         'connection' => 'tenant',
-                        'mappings' => [
+                        'naming_strategy' => $dbSwitcherConfig['tenant_entity_manager']['tenant_naming_strategy'],
+                        'mappings' => array_merge([
                             'HakamMultiTenancyBundle' => [
                                 'type' => $dbSwitcherConfig['tenant_entity_manager']['mapping']['type'],
                                 'dir' => $dbSwitcherConfig['tenant_entity_manager']['mapping']['dir'],
@@ -67,7 +68,7 @@ class HakamMultiTenancyExtension extends Extension implements PrependExtensionIn
                                 'alias' => $dbSwitcherConfig['tenant_entity_manager']['mapping']['alias'] ?? null,
                                 'is_bundle' => $dbSwitcherConfig['tenant_entity_manager']['mapping']['is_bundle'] ?? true,
                             ],
-                        ],
+                        ], $dbSwitcherConfig['tenant_entity_manager']['mappings'] ?? []),
                     ],
                 ],
             ];
@@ -84,7 +85,7 @@ class HakamMultiTenancyExtension extends Extension implements PrependExtensionIn
             }
 
             if (!isset($bundles['doctrine_migrations'])) {
-            //    $container->prependExtensionConfig('doctrine_migrations', ['migrations_paths' => $tenantDoctrineMigrationPath]);
+                //    $container->prependExtensionConfig('doctrine_migrations', ['migrations_paths' => $tenantDoctrineMigrationPath]);
                 $container->setParameter('tenant_doctrine_migration', ['migrations_paths' => $tenantDoctrineMigrationPath]);
             } else {
                 throw new InvalidConfigurationException('You need to enable Doctrine Migration Bundle to be able to use MultiTenancy Bundle');
